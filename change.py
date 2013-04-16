@@ -1,91 +1,48 @@
-##For a space that is 'populated':
-##Each cell with one or no neighbors dies, as if by loneliness.
-##Each cell with four or more neighbors dies, as if by overpopulation.
-##Each cell with two or three neighbors survives.
-##For a space that is 'empty' or 'unpopulated'
-##Each cell with three neighbors becomes populated.
-
-
 import matrix
-import random
 
-import pygame
-from pygame.locals import *
-from sys import exit
-import time
 
-billx=10
-billy=10
-
-billr=10
-
-matrixb={}
 matrixbnext={}
 
-for i in range(billx):
-    for j in range(billy):
-        matrixb[(i,j)]=int(random.random()*5//3)
-        print (matrixb[(i,j)],end="  ")
-    print ('\n')
-
-
-
-pygame.init()
-screen = pygame.display.set_mode((billx*billr*2,billy*billr*2), 0, 32)
-pygame.display.set_caption("burberry")
-points = []
-
-
-
-def changeb(matrixb):
+def changeb(matrixb,billx,billy):
     for i in matrixb.keys():
         countb=0
-        if matrixb[i]==0:
+        
+        #当前为空的格子，如果周围有三个非空=>变非空
+        if matrixb[i][0]==0:
+            listb=[0,0,0]
+            #kidx返回周围坐标点
             for kidx in matrix.naberb(i,billx,billy).values():
-               if matrixb[kidx]==1:
-                   countb=countb+1
+                #周围非空时+1
+                #print (matrixb[kidx])
+                try:
+                    if matrixb[kidx][0]==1:
+                        countb=countb+1
+                        #周围点颜色matrixb[kidx][1]
+                        listb[0]=listb[0]+matrixb[kidx][1][0]
+                        listb[1]=listb[1]+matrixb[kidx][1][1]
+                        listb[2]=listb[2]+matrixb[kidx][1][2]
+                        #print(listb)
+                except:
+                    print (matrixb)
+                    print (kidx)
             if countb==3:
-                matrixbnext[i]=1
+                
+                for j in range(3):
+                    listb[j]=listb[j]//3 - 20*j
+                print(listb)
+                listb=tuple(listb)
+                matrixbnext[i]=(1,listb)
+                #matrixbnext[i]=(1,(255,255,255))
+                
             else:
-                matrixbnext[i]=0
-        elif matrixb[i]==1:
+                matrixbnext[i]=(0,(255,255,255))
+        #当前为非空的格子，如果周围有2/3个非空=>保持
+        elif matrixb[i][0]==1:
             for kidx in matrix.naberb(i,billx,billy).values():
-               if matrixb[kidx]==1:
+               if matrixb[kidx][0]==1:
                    countb=countb+1
             if countb==2 or countb==3:
-                matrixbnext[i]=1
+                matrixbnext[i]=(1,(255,255,255))
             else:
-                matrixbnext[i]=0
+                matrixbnext[i]=(0,(255,255,255))
     return matrixbnext
-
-for kk in range(120):
-    print ('################')
-    billq=changeb(matrixb)    
-
-
-##    for i in range(billx):
-##        for j in range(billy):
-##            print (billq[(i,j)],end="  ")
-##        print ('\n')
-    screen.fill((0,0,0))
-    for i in range(billx):
-        pygame.draw.line(screen, (0, 0, 0), (i*billr*2, 0), (i*billr*2, billy*billr*2))
-    for j in range(billy):
-        pygame.draw.line(screen, (0, 0, 0), (0,j*billr*2), (billx*billr*2,j*billr*2))
-    
-
-    for i in matrixb.keys():
-        if matrixb[i]==1:
-            pygame.draw.circle(screen, (255,255,255), (i[0]*billr*2+billr,i[1]*billr*2+billr), billr)
-
-    pygame.display.update()
-    matrixb=billq
-    time.sleep(1)
-            
-
-        
-
- 
-
-
-    
